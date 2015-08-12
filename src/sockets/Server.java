@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Server {
-	
+
 	private int port;
 	private List<PrintStream> clients;
 	private ServerSocket server;
@@ -18,7 +18,7 @@ public class Server {
 	public static void main(String[] args) throws IOException {
 		new Server(12345).run();
 	}
-	
+
 	public Server(int port) {
 		this.port = port;
 		this.clients = new ArrayList<PrintStream>();
@@ -31,7 +31,7 @@ public class Server {
 			}
 		};
 		System.out.println("Port 12345 is now open.");
-		
+
 		while (true) {
 			// accepts a new client
 			Socket client = server.accept();
@@ -39,10 +39,10 @@ public class Server {
 			// add client message to list
 			this.clients.add(new PrintStream(client.getOutputStream()));
 			// create a new thread for client handling
-			new Thread(new HandleClient(this, client.getInputStream())).run();			
+			new Thread(new ClientHandler(this, client.getInputStream())).start();
 		}
 	}
-	
+
 	void broadcastMessages(String msg) {
 		for (PrintStream client : this.clients) {
 			client.println(msg);
@@ -50,12 +50,12 @@ public class Server {
 	}
 }
 
-class HandleClient implements Runnable {
-	
+class ClientHandler implements Runnable {
+
 	private Server server;
 	private InputStream client;
-	
-	public HandleClient (Server server, InputStream client) {
+
+	public ClientHandler(Server server, InputStream client) {
 		this.server = server;
 		this.client = client;
 	}
@@ -67,8 +67,6 @@ class HandleClient implements Runnable {
 		while (sc.hasNextLine()) {
 			server.broadcastMessages(sc.nextLine());
 		}
-		sc.close();	
+		sc.close();
 	}
 }
-
-
