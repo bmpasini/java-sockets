@@ -36,8 +36,10 @@ public class Server {
 			// accepts a new client
 			Socket client = server.accept();
 			System.out.println("Connection established with client: " + client.getInetAddress().getHostAddress());
+			
 			// add client message to list
 			this.clients.add(new PrintStream(client.getOutputStream()));
+			
 			// create a new thread for client handling
 			new Thread(new ClientHandler(this, client.getInputStream())).start();
 		}
@@ -62,10 +64,13 @@ class ClientHandler implements Runnable {
 
 	@Override
 	public void run() {
+		String message;
+		
 		// when there is a new message, broadcast to all
 		Scanner sc = new Scanner(this.client);
 		while (sc.hasNextLine()) {
-			server.broadcastMessages(sc.nextLine());
+			message = sc.nextLine();
+			server.broadcastMessages(message);
 		}
 		sc.close();
 	}
